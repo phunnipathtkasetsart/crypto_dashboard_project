@@ -15,7 +15,7 @@ class CryptoTicker:
         self.ws = None
         
         # Create UI
-        self.frame = ttk.Frame(parent, relief="solid", borderwidth=1, padding=20)
+        self.frame = tk.Frame(parent, bg="#1E1E1E", highlightbackground="#2A2A2A",highlightthickness=1, padx=20, pady=20)
         
         # Title
         ttk.Label(self.frame, text=display_name, 
