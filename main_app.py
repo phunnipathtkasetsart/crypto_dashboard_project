@@ -3,17 +3,17 @@ from tkinter import ttk
 
 # Import all ticker files
 from crypto_ticker import CryptoTicker
-from Tickers.btc_ticker import BTCTicker
-from Tickers.eth_ticker import ETHTicker
-from Tickers.bnb_ticker import BNBTicker
-from Tickers.sol_ticker import SOLTicker
-from Tickers.ada_ticker import ADATicker
-from Tickers.xrp_ticker import XRPTicker
-from Tickers.doge_ticker import DOGETicker
-from Tickers.dot_ticker import DOTTicker
-from Tickers.link_ticker import LINKTicker
-from Tickers.ltc_ticker import LTCTicker
-from Tickers.shib_ticker import SHIBTicker
+from tickers.btc_ticker import BTCTicker
+from tickers.eth_ticker import ETHTicker
+from tickers.bnb_ticker import BNBTicker
+from tickers.sol_ticker import SOLTicker
+from tickers.ada_ticker import ADATicker
+from tickers.xrp_ticker import XRPTicker
+from tickers.doge_ticker import DOGETicker
+from tickers.dot_ticker import DOTTicker
+from tickers.link_ticker import LINKTicker
+from tickers.ltc_ticker import LTCTicker
+from tickers.shib_ticker import SHIBTicker
 
 
 class MultiTickerApp:
