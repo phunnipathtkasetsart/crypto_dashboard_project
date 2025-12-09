@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+# Import all ticker files
+from crypto_ticker import CryptoTicker
 from Tickers.btc_ticker import BTCTicker
 from Tickers.eth_ticker import ETHTicker
 from Tickers.bnb_ticker import BNBTicker
@@ -21,46 +23,41 @@ class MultiTickerApp:
         root.geometry("1200x600")
 
         self.tickers = []
+        self.sol_visible = False
 
-
-        ## Scroll ##
-
-
+        # Scrolls
         left_container = tk.Frame(root, bg="#1E1E1E")
         left_container.pack(side="left", fill="y")
-
-        # Canvas for scrolling
         self.canvas = tk.Canvas(left_container, bg="#1E1E1E", highlightthickness=0)
         self.canvas.pack(side="left", fill="y", expand=True)
-
-        # Scrollbar
         scrollbar = ttk.Scrollbar(left_container, orient="vertical", command=self.canvas.yview)
         scrollbar.pack(side="right", fill="y")
-
-        # Connect scrollbar ↔ canvas
         self.canvas.configure(yscrollcommand=scrollbar.set)
-
-        # Inner frame inside canvas
         self.left_panel = tk.Frame(self.canvas, bg="#1E1E1E")
         self.canvas.create_window((0, 0), window=self.left_panel, anchor="nw")
-
-        # Auto scroll region
-        self.left_panel.bind(
-            "<Configure>",
-            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-        )
-
-        # Allow scroll with mousewheel
+        self.left_panel.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-
-        
-        ## Scroll ##
-
-
         self.center_panel = tk.Frame(root, bg="#000000")
         self.center_panel.pack(side="left", fill="both", expand=True)
 
-        #Add tickers
+
+        # Control pannel
+        control_frame = ttk.Frame(root, padding=10)
+        control_frame.pack(fill=tk.X)
+
+        # Button to show/hide SOL chart on the right
+        self.sol_btn = ttk.Button(
+            control_frame,
+            text="Show SOL/USDT",
+            command=self.toggle_sol
+        )
+        self.sol_btn.pack()
+
+        # Create the SOL chart ticker, but don't show it yet
+        self.sol_ticker = CryptoTicker(self.center_panel, "solusdt", "SOL/USDT")
+
+
+
         self.add_ticker(self.left_panel, BTCTicker)
         self.add_ticker(self.left_panel, ETHTicker)
         self.add_ticker(self.left_panel, BNBTicker)
@@ -73,11 +70,12 @@ class MultiTickerApp:
         self.add_ticker(self.left_panel, LTCTicker)
         self.add_ticker(self.left_panel, SHIBTicker)
 
+
     def _on_mousewheel(self, event):
         self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
+
     def style_ticker(self, ticker_frame):
-        """Apply Figma-style dark theme to a ticker frame."""
         ticker_frame.configure(bg="#1E1E1E")
 
         for widget in ticker_frame.winfo_children():
@@ -93,12 +91,25 @@ class MultiTickerApp:
             padx=10,
             pady=10
         )
-    
+
+    def toggle_sol(self):
+        if self.sol_visible:
+            self.sol_ticker.stop()
+            self.sol_ticker.pack_forget()
+            self.sol_btn.config(text="Show SOL/USDT")
+            self.sol_visible = False
+        else:
+            self.sol_ticker.pack(side=tk.LEFT, padx=10, fill=tk.BOTH, expand=True)
+            self.sol_ticker.start()
+            self.sol_btn.config(text="Hide SOL/USDT")
+            self.sol_visible = True
+
+
     def add_ticker(self, parent, TickerClass):
-        ticker = TickerClass(parent)
+        ticker = TickerClass(parent)   # Create ticker object
         ticker.pack(fill="x", pady=6, padx=6)
 
-        self.style_ticker(ticker.frame)
+        self.style_ticker(ticker.frame)  # Style it
 
         ticker.start()
         self.tickers.append(ticker)
