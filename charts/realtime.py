@@ -25,7 +25,7 @@ class BinanceKlineFeed:
             params = {
                 "symbol": self.symbol.upper(),
                 "interval": self.interval,
-                "limit": 60 # last 100 bars
+                "limit": 60 # last 60 bars
             }
 
             try:
@@ -79,9 +79,14 @@ class BinanceKlineFeed:
             on_message=self._on_message,
             on_close=lambda ws: None
         )
-        self.ws.run_forever()
+        # Solution: Always use threading
+        threading.Thread(target=self.ws.run_forever, daemon=True).start()
 
     def _on_message(self, ws, message):
+            # Debuggin code
+            """print(f"Received: {message}") """ 
+            """data = json.loads(message)"""
+
             data = json.loads(message)["k"]
 
             if not data["x"] and not self.df.empty and (data["t"] / 1000) == self.df.index[-1].timestamp():
