@@ -23,7 +23,6 @@ class MultiTickerApp:
         root.geometry("1200x600")
 
         self.tickers = []
-        self.sol_visible = False
 
         # Scrolls
         style = ttk.Style()
@@ -63,10 +62,10 @@ class MultiTickerApp:
         control_frame = tk.Frame(root, padx=10,bg="#1E1E1E")
         control_frame.pack(side="left", fill="y")
 
-        # ---- Style for Toggle Button ----
+        # Toggle Buttons
+        self.sol_visible = False
         style = ttk.Style()
         style.theme_use("clam")
-
         style.configure(
             "Toggle.TButton",
             font=("Segoe UI", 11, "bold"),
@@ -85,20 +84,47 @@ class MultiTickerApp:
         )
         
 
-        # Button to show/hide SOL chart on the right
-        self.sol_btn = ttk.Button(
-            control_frame,
-            text="Show SOL/USDT",
-            command=self.toggle_sol,
-            style="Toggle.TButton"
-        )
-        self.sol_btn.pack(pady=5)
+        # Dictionary storage
+        self.tickers_dict = {}         # symbol -> CryptoTicker object
+        self.ticker_states = {}   # symbol -> Boolean
+        self.ticker_buttons = {}  # symbol -> button object
 
-        # Create the SOL chart ticker, but don't show it yet
-        self.sol_ticker = CryptoTicker(self.center_panel, "solusdt", "SOL/USDT")
+        # List of cryptocurrencies
+        crypto_list = [
+            ("solusdt", "SOL/USDT"),
+            ("btcusdt", "BTC/USDT"),
+            ("ethusdt", "ETH/USDT"),
+            ("bnbusdt", "BNB/USDT"),
+            ("adausdt", "ADA/USDT"),
+            ("xrpusdt", "XRP/USDT"),
+            ("dogeusdt", "DOGE/USDT"),
+        ]
+
+        # Create everything automatically
+        for symbol, display_name in crypto_list:
+        
+            # initial visibility
+            self.ticker_states[symbol] = False
+
+            # create ticker instance
+            self.tickers_dict[symbol] = CryptoTicker(
+                self.center_panel, symbol, display_name
+            )
+
+            # create button
+            btn = ttk.Button(
+                control_frame,
+                text=f"Show {display_name}",
+                style="Toggle.TButton",
+                command=lambda s=symbol: self.toggle_ticker(s)
+            )
+            btn.pack(pady=5)
+
+            # store button reference
+            self.ticker_buttons[symbol] = btn
 
 
-
+        # Add tickers
         self.add_ticker(self.left_panel, BTCTicker)
         self.add_ticker(self.left_panel, ETHTicker)
         self.add_ticker(self.left_panel, BNBTicker)
@@ -133,17 +159,23 @@ class MultiTickerApp:
             pady=10
         )
 
-    def toggle_sol(self):
-        if self.sol_visible:
-            self.sol_ticker.stop()
-            self.sol_ticker.pack_forget()
-            self.sol_btn.config(text="Show SOL/USDT")
-            self.sol_visible = False
+    def toggle_ticker(self, symbol):
+    
+        ticker = self.tickers_dict[symbol]
+        btn = self.ticker_buttons[symbol]
+        visible = self.ticker_states[symbol]
+        name = ticker.display_name  # "SOL/USDT"
+    
+        if visible:
+            ticker.stop()
+            ticker.pack_forget()
+            btn.config(text=f"Show {name}")
+            self.ticker_states[symbol] = False
         else:
-            self.sol_ticker.pack(side=tk.LEFT, padx=10, fill=tk.BOTH, expand=True)
-            self.sol_ticker.start()
-            self.sol_btn.config(text="Hide SOL/USDT")
-            self.sol_visible = True
+            ticker.pack(side=tk.LEFT, padx=10, fill=tk.BOTH, expand=True)
+            ticker.start()
+            btn.config(text=f"Hide {name}")
+            self.ticker_states[symbol] = True
 
 
     def add_ticker(self, parent, TickerClass):
