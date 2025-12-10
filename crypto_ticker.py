@@ -14,25 +14,54 @@ class CryptoTicker:
         self.is_active = False
         self.ws = None
         
-        # Create UI
-        self.frame = tk.Frame(parent, bg="#1E1E1E", highlightbackground="#2A2A2A",highlightthickness=1, padx=20, pady=20)
-        
-        # Title
-        ttk.Label(self.frame, text=display_name, 
-                 font=("Arial", 16, "bold")).pack()
-        
-        # Price
-        self.price_label = tk.Label(self.frame, text="--,---", 
-                                    font=("Arial", 40, "bold"))
-        self.price_label.pack(pady=10)
-        
-        # Change
-        self.change_label = ttk.Label(self.frame, text="--", 
-                                      font=("Arial", 12))
-        self.change_label.pack()
-    
+        # ---- Main card ----
+        self.frame = tk.Frame(
+            parent,
+            bg="#1E1E1E",
+            highlightbackground="#2A2A2A",   # border color
+            highlightthickness=1,
+            padx=18,
+            pady=14,
+        )
+
+        # ---- Left bar ----
+        self.accent = tk.Frame(self.frame, bg="#2ECC71", width=4)
+        self.accent.pack(side="left", fill="y", padx=(0, 12),pady=0)
+        self.accent2 = tk.Frame(self.frame, bg="#1E1E1E", width=4)
+        self.accent2.pack(side="right", fill="y", padx=(0, 165),pady=0)
+        # ---- Title ----
+        self.title_label = tk.Label(
+            self.frame,
+            text=display_name,
+            bg="#1E1E1E",
+            fg="#E0E0E0",
+            font=("Segoe UI", 14, "bold")
+        )
+        self.title_label.pack(anchor="w")
+
+        # ---- price ----
+        self.price_label = tk.Label(
+            self.frame,
+            text="--,---",
+            bg="#1E1E1E",
+            fg="#E0E0E0",
+            font=("Segoe UI", 28, "bold")
+        )
+        self.price_label.pack(anchor="w", pady=(6, 2))
+
+        # ---- change ----
+        self.change_label = tk.Label(
+            self.frame,
+            text="--",
+            bg="#1E1E1E",
+            fg="#A0A0A0",
+            font=("Segoe UI", 11)
+        )
+        self.change_label.pack(anchor="w")
+
+    # Sockets
+
     def start(self):
-        """Start WebSocket connection."""
         if self.is_active:
             return
         
@@ -48,16 +77,15 @@ class CryptoTicker:
         )
         
         threading.Thread(target=self.ws.run_forever, daemon=True).start()
-    
+
     def stop(self):
-        """Stop WebSocket connection."""
         self.is_active = False
         if self.ws:
             self.ws.close()
             self.ws = None
-    
+
+    # ----------------- UI updates -----------------
     def on_message(self, ws, message):
-        """Handle price updates."""
         if not self.is_active:
             return
         
@@ -66,27 +94,31 @@ class CryptoTicker:
         change = float(data['p'])
         percent = float(data['P'])
         
-        # Schedule GUI update on main thread
         self.parent.after(0, self.update_display, price, change, percent)
-    
+
     def update_display(self, price, change, percent):
-        """Update the ticker display."""
         if not self.is_active:
             return
         
-        color = "green" if change >= 0 else "red"
+        # Green/up or Red/down
+        up = change >= 0
+        color = "#2ECC71" if up else "#E74C3C"
+
+        # Update accent bar
+        self.accent.configure(bg=color)
+
+        # Large price text
         self.price_label.config(text=f"{price:,.2f}", fg=color)
-        
-        sign = "+" if change >= 0 else ""
+
+        # Smaller change text
+        sign = "+" if up else ""
         self.change_label.config(
             text=f"{sign}{change:,.2f} ({sign}{percent:.2f}%)",
-            foreground=color
+            fg=color
         )
-    
+
     def pack(self, **kwargs):
-        """Allow easy placement of ticker."""
         self.frame.pack(**kwargs)
     
     def pack_forget(self):
-        """Hide the ticker."""
         self.frame.pack_forget()
