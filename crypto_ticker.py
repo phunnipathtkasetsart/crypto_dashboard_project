@@ -27,13 +27,13 @@ class CryptoTicker:
         # ---- Left bar ----
         self.accent = tk.Frame(self.frame, bg="#2ECC71", width=4)
         self.accent.pack(side="left", fill="y", padx=(0, 12),pady=0)
-        self.accent2 = tk.Frame(self.frame, bg="#1E1E1E", width=4)
-        self.accent2.pack(side="right", fill="y", padx=(0, 165),pady=0)
+        self.accent2 = tk.Frame(self.frame, bg="#000000", width=4)
+        self.accent2.pack(side="right", fill="y", padx=(0, 190),pady=0)
         # ---- Title ----
         self.title_label = tk.Label(
             self.frame,
             text=display_name,
-            bg="#1E1E1E",
+            bg="#000000",
             fg="#E0E0E0",
             font=("Segoe UI", 14, "bold")
         )
@@ -43,7 +43,7 @@ class CryptoTicker:
         self.price_label = tk.Label(
             self.frame,
             text="--,---",
-            bg="#1E1E1E",
+            bg="#000000",
             fg="#E0E0E0",
             font=("Segoe UI", 28, "bold")
         )
@@ -53,7 +53,7 @@ class CryptoTicker:
         self.change_label = tk.Label(
             self.frame,
             text="--",
-            bg="#1E1E1E",
+            bg="#000000",
             fg="#A0A0A0",
             font=("Segoe UI", 11)
         )

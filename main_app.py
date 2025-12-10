@@ -39,7 +39,7 @@ class MultiTickerApp:
             arrowcolor="#5A5A5A"
         )
         
-        left_container = tk.Frame(root, bg="#1E1E1E")
+        left_container = tk.Frame(root, bg="#000000")
         left_container.pack(side="left", fill="y")
         self.canvas = tk.Canvas(left_container, bg="#1E1E1E", highlightthickness=0)
         self.canvas.pack(side="left", fill="y")
@@ -143,11 +143,11 @@ class MultiTickerApp:
 
 
     def style_ticker(self, ticker_frame):
-        ticker_frame.configure(bg="#1E1E1E")
+        ticker_frame.configure(bg="#000000")
 
         for widget in ticker_frame.winfo_children():
             try:
-                widget.configure(bg="#1E1E1E", fg="#D0D0D0", font=("Segoe UI", 12))
+                widget.configure(bg="#000000", fg="#D0D0D0", font=("Segoe UI", 12))
             except:
                 pass
 
