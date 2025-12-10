@@ -75,7 +75,7 @@ class CryptoTicker:
             on_close=lambda ws, s, m: print(f"{self.symbol} closed"),
             on_open=lambda ws: print(f"{self.symbol} connected")
         )
-        
+        # Solution: Always use threading
         threading.Thread(target=self.ws.run_forever, daemon=True).start()
 
     def stop(self):
