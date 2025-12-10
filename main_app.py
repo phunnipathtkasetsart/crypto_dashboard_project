@@ -26,32 +26,73 @@ class MultiTickerApp:
         self.sol_visible = False
 
         # Scrolls
+        style = ttk.Style()
+        style.theme_use("clam")
+        style.configure(
+            "Dark.Vertical.TScrollbar",
+            troughcolor="#1A1A1A",
+            background="#3A3A3A",
+            darkcolor="#2E2E2E",
+            lightcolor="#2E2E2E",
+            bordercolor="#1A1A1A",
+            arrowcolor="#5A5A5A"
+        )
+        
         left_container = tk.Frame(root, bg="#1E1E1E")
         left_container.pack(side="left", fill="y")
         self.canvas = tk.Canvas(left_container, bg="#1E1E1E", highlightthickness=0)
-        self.canvas.pack(side="left", fill="y", expand=True)
-        scrollbar = ttk.Scrollbar(left_container, orient="vertical", command=self.canvas.yview)
+        self.canvas.pack(side="left", fill="y")
+        scrollbar = ttk.Scrollbar(
+            left_container,
+            orient="vertical",
+            command=self.canvas.yview,
+            style="Dark.Vertical.TScrollbar"
+        )
         scrollbar.pack(side="right", fill="y")
         self.canvas.configure(yscrollcommand=scrollbar.set)
         self.left_panel = tk.Frame(self.canvas, bg="#1E1E1E")
         self.canvas.create_window((0, 0), window=self.left_panel, anchor="nw")
         self.left_panel.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-        self.center_panel = tk.Frame(root, bg="#000000")
+
+        self.center_panel = tk.Frame(root, bg="#000000",width=150)
         self.center_panel.pack(side="left", fill="both", expand=True)
 
 
         # Control pannel
-        control_frame = ttk.Frame(root, padding=10)
-        control_frame.pack(fill=tk.X)
+        control_frame = tk.Frame(root, padx=10,bg="#1E1E1E")
+        control_frame.pack(side="left", fill="y")
+
+        # ---- Style for Toggle Button ----
+        style = ttk.Style()
+        style.theme_use("clam")
+
+        style.configure(
+            "Toggle.TButton",
+            font=("Segoe UI", 11, "bold"),
+            foreground="#FFFFFF",
+            padding=10,
+            borderwidth=0,
+            focusthickness=0,
+            relief="flat"
+        )
+        style.map(
+            "Toggle.TButton",
+            background=[
+                ("active", "#3F3F3F"),   # soft hover
+                ("!active", "#333333")
+            ],
+        )
+        
 
         # Button to show/hide SOL chart on the right
         self.sol_btn = ttk.Button(
             control_frame,
             text="Show SOL/USDT",
-            command=self.toggle_sol
+            command=self.toggle_sol,
+            style="Toggle.TButton"
         )
-        self.sol_btn.pack()
+        self.sol_btn.pack(pady=5)
 
         # Create the SOL chart ticker, but don't show it yet
         self.sol_ticker = CryptoTicker(self.center_panel, "solusdt", "SOL/USDT")
@@ -109,7 +150,7 @@ class MultiTickerApp:
         ticker = TickerClass(parent)   # Create ticker object
         ticker.pack(fill="x", pady=6, padx=6)
 
-        self.style_ticker(ticker.frame)  # Style it
+        self.style_ticker(ticker.frame)  # Style
 
         ticker.start()
         self.tickers.append(ticker)
