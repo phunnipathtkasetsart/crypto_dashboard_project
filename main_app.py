@@ -3,25 +3,27 @@ from tkinter import ttk
 
 # Import all ticker files
 from crypto_ticker import CryptoTicker
-from tickers.btc_ticker import BTCTicker
-from tickers.eth_ticker import ETHTicker
-from tickers.bnb_ticker import BNBTicker
-from tickers.sol_ticker import SOLTicker
-from tickers.ada_ticker import ADATicker
-from tickers.xrp_ticker import XRPTicker
-from tickers.doge_ticker import DOGETicker
-from tickers.dot_ticker import DOTTicker
-from tickers.link_ticker import LINKTicker
-from tickers.ltc_ticker import LTCTicker
-from tickers.shib_ticker import SHIBTicker
+from tickers.tickers_all import BTCTicker
+from tickers.tickers_all import ETHTicker
+from tickers.tickers_all import BNBTicker
+from tickers.tickers_all import SOLTicker
+from tickers.tickers_all import ADATicker
+from tickers.tickers_all import XRPTicker
+from tickers.tickers_all  import DOGETicker
+from tickers.tickers_all import DOTTicker
+from tickers.tickers_all  import LINKTicker
+from tickers.tickers_all import LTCTicker
+from tickers.tickers_all  import SHIBTicker
 
+# Import Chart
+from charts.chart import CandleChart
+from charts.realtime import BinanceKlineFeed
 
 class MultiTickerApp:
     def __init__(self, root):
         self.root = root
         root.title("Crypto Dashboard")
         root.geometry("1200x600")
-
         self.tickers = []
 
         # Scrolls
@@ -63,7 +65,6 @@ class MultiTickerApp:
         control_frame.pack(side="left", fill="y")
 
         # Toggle Buttons
-        self.sol_visible = False
         style = ttk.Style()
         style.theme_use("clam")
         style.configure(
@@ -78,16 +79,16 @@ class MultiTickerApp:
         style.map(
             "Toggle.TButton",
             background=[
-                ("active", "#3F3F3F"),   # soft hover
+                ("active", "#3F3F3F"),   
                 ("!active", "#333333")
             ],
         )
         
 
         # Dictionary storage
-        self.tickers_dict = {}         # symbol -> CryptoTicker object
-        self.ticker_states = {}   # symbol -> Boolean
-        self.ticker_buttons = {}  # symbol -> button object
+        self.tickers_dict = {}    # CryptoTicker object
+        self.ticker_states = {}   # Boolean
+        self.ticker_buttons = {}  # button object
 
         # List of cryptocurrencies
         crypto_list = [
@@ -122,7 +123,6 @@ class MultiTickerApp:
 
             # store button reference
             self.ticker_buttons[symbol] = btn
-
 
         # Add tickers
         self.add_ticker(self.left_panel, BTCTicker)
@@ -160,22 +160,21 @@ class MultiTickerApp:
         )
 
     def toggle_ticker(self, symbol):
-    
-        ticker = self.tickers_dict[symbol]
-        btn = self.ticker_buttons[symbol]
-        visible = self.ticker_states[symbol]
-        name = ticker.display_name  # "SOL/USDT"
-    
-        if visible:
-            ticker.stop()
-            ticker.pack_forget()
-            btn.config(text=f"Show {name}")
-            self.ticker_states[symbol] = False
-        else:
-            ticker.pack(side=tk.LEFT, padx=10, fill=tk.BOTH, expand=True)
-            ticker.start()
-            btn.config(text=f"Hide {name}")
-            self.ticker_states[symbol] = True
+            # Stop and remove the old chart/feed
+            if hasattr(self, "active_chart"):
+                self.active_feed.stop() 
+                self.active_chart.pack_forget()
+
+            # Create the new chart widget
+            self.active_chart = CandleChart(self.center_panel, title=symbol.upper())
+            self.active_chart.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+            self.active_feed = BinanceKlineFeed(
+                chart=self.active_chart, 
+                root=self.root,  
+                symbol=symbol, 
+                interval="5m"
+            )
+            self.active_feed.start()
 
 
     def add_ticker(self, parent, TickerClass):
