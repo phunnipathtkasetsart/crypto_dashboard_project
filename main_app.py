@@ -3,17 +3,17 @@ from tkinter import ttk
 
 # Import all ticker files
 from crypto_ticker import CryptoTicker
-from tickers.tickers_all import BTCTicker
-from tickers.tickers_all import ETHTicker
-from tickers.tickers_all import BNBTicker
-from tickers.tickers_all import SOLTicker
-from tickers.tickers_all import ADATicker
-from tickers.tickers_all import XRPTicker
-from tickers.tickers_all  import DOGETicker
-from tickers.tickers_all import DOTTicker
-from tickers.tickers_all  import LINKTicker
-from tickers.tickers_all import LTCTicker
-from tickers.tickers_all  import SHIBTicker
+from tickers.ticker_all import BTCTicker
+from tickers.ticker_all import ETHTicker
+from tickers.ticker_all import BNBTicker
+from tickers.ticker_all import SOLTicker
+from tickers.ticker_all import ADATicker
+from tickers.ticker_all import XRPTicker
+from tickers.ticker_all  import DOGETicker
+from tickers.ticker_all import DOTTicker
+from tickers.ticker_all  import LINKTicker
+from tickers.ticker_all import LTCTicker
+from tickers.ticker_all  import SHIBTicker
 
 # Import Chart
 from charts.chart import CandleChart
