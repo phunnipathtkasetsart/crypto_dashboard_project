@@ -17,7 +17,7 @@ class CryptoTicker:
         # ---- Main card ----
         self.frame = tk.Frame(
             parent,
-            bg="#1E1E1E",
+            bg="#000000",
             highlightbackground="#2A2A2A",   # border color
             highlightthickness=1,
             padx=18,
