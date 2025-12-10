@@ -125,16 +125,16 @@ class MultiTickerApp:
             self.ticker_buttons[symbol] = btn
 
         # Add tickers
-        self.add_ticker(self.left_panel, BTCTicker)
-        self.add_ticker(self.left_panel, ETHTicker)
-        self.add_ticker(self.left_panel, BNBTicker)
-        self.add_ticker(self.left_panel, SOLTicker)
-        self.add_ticker(self.left_panel, ADATicker)
-        self.add_ticker(self.left_panel, XRPTicker)
+        self.add_ticker(self.left_panel, BTCTicker )
+        self.add_ticker(self.left_panel, ETHTicker )
+        self.add_ticker(self.left_panel, BNBTicker )
+        self.add_ticker(self.left_panel, SOLTicker )
+        self.add_ticker(self.left_panel, ADATicker )
+        self.add_ticker(self.left_panel, XRPTicker )
         self.add_ticker(self.left_panel, DOGETicker)
-        self.add_ticker(self.left_panel, DOTTicker)
+        self.add_ticker(self.left_panel, DOTTicker )
         self.add_ticker(self.left_panel, LINKTicker)
-        self.add_ticker(self.left_panel, LTCTicker)
+        self.add_ticker(self.left_panel, LTCTicker )
         self.add_ticker(self.left_panel, SHIBTicker)
 
 
@@ -190,6 +190,9 @@ class MultiTickerApp:
     def on_closing(self):
         for t in self.tickers:
             t.stop()
+        self.is_closing = True
+        if self.ws:
+            self.ws.close()
         self.root.destroy()
 
 
