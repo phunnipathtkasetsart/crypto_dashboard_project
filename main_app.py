@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from dashboard.dashboard_panel import DashboardPanel
 
 # Import all ticker files
 from crypto_ticker import CryptoTicker
@@ -18,6 +19,9 @@ from tickers.ticker_all  import SHIBTicker
 # Import Chart
 from charts.chart import CandleChart
 from charts.realtime import BinanceKlineFeed
+
+
+
 
 class MultiTickerApp:
     def __init__(self, root):
@@ -61,68 +65,113 @@ class MultiTickerApp:
 
 
         # Control pannel
-        control_frame = tk.Frame(root, padx=10,bg="#1E1E1E")
+        control_frame = tk.Frame(root, padx=10, bg="#1E1E1E")
         control_frame.pack(side="left", fill="y")
 
-        # Toggle Buttons
+        # Right panel
+        self.right_panel = DashboardPanel(root)
+        self.right_panel.pack(side="right", fill="y")
+
+
+        # Overlay Button Style
         style = ttk.Style()
         style.theme_use("clam")
+        
         style.configure(
-            "Toggle.TButton",
-            font=("Segoe UI", 11, "bold"),
-            foreground="#FFFFFF",
-            padding=10,
+            "Overlay.TButton",
+            font=("Segoe UI", 8, "bold"),
+            foreground="#AAAAAA",
+            background="#000000",
+            padding=(8, 6),
             borderwidth=0,
-            focusthickness=0,
             relief="flat"
         )
-        style.map(
-            "Toggle.TButton",
-            background=[
-                ("active", "#3F3F3F"),   
-                ("!active", "#333333")
-            ],
+        
+        style.configure(
+            "OverlayActive.TButton",
+            font=("Segoe UI", 9, "bold"),
+            foreground="#00FF88",
+            background="#000000",
         )
         
+        style.map(
+            "Overlay.TButton",
+            background=[("active", "#111111")]
+        )
+        
+        # Scrollable Overlay Container 
+        self.overlay_container = tk.Frame(self.center_panel, bg="#000000")
+        self.overlay_container.place(x=12, y=12, relwidth=0.95)
+        style.configure(
+            "Dark.Horizontal.TScrollbar",
+            troughcolor="#1A1A1A",
+            background="#1A1A1A",
+            darkcolor="#1A1A1A",
+            lightcolor="#1A1A1A",
+            bordercolor="#1A1A1A",
+            arrowcolor="#000000"
+        )
+        self.overlay_canvas = tk.Canvas(
+            self.overlay_container,
+            bg="#000000",
+            height=40,
+            highlightthickness=0
+        )
+        self.overlay_canvas.pack(side="top", fill="x", expand=True)
 
-        # Dictionary storage
-        self.tickers_dict = {}    # CryptoTicker object
-        self.ticker_states = {}   # Boolean
-        self.ticker_buttons = {}  # button object
+        overlay_scroll = ttk.Scrollbar(
+            self.overlay_container,
+            orient="horizontal",
+            command=self.overlay_canvas.xview,
+            style="Dark.Horizontal.TScrollbar"
+        )
+        overlay_scroll.pack(side="bottom", fill="x")
 
-        # List of cryptocurrencies
+        self.overlay_canvas.configure(xscrollcommand=overlay_scroll.set)
+
+        # Inner frame 
+        self.overlay_panel = tk.Frame(self.overlay_canvas, bg="#000000")
+        self.overlay_canvas.create_window(
+            (0, 0),
+            window=self.overlay_panel,
+            anchor="nw"
+        )
+
+        # Update scroll region
+        self.overlay_panel.bind(
+            "<Configure>",
+            lambda e: self.overlay_canvas.configure(
+                scrollregion=self.overlay_canvas.bbox("all")
+            )
+        )
+
+
+        self.overlay_buttons = {}
+        
         crypto_list = [
-            ("solusdt", "SOL/USDT"),
-            ("btcusdt", "BTC/USDT"),
-            ("ethusdt", "ETH/USDT"),
-            ("bnbusdt", "BNB/USDT"),
-            ("adausdt", "ADA/USDT"),
-            ("xrpusdt", "XRP/USDT"),
-            ("dogeusdt", "DOGE/USDT"),
+            ("solusdt",  "SOL/USDT",  ),
+            ("btcusdt",  "BTC/USDT",  ),
+            ("ethusdt",  "ETH/USDT",  ),
+            ("bnbusdt",  "BNB/USDT",  ),
+            ("adausdt",  "ADA/USDT",  ),
+            ("xrpusdt",  "XRP/USDT",  ),
+            ("dogeusdt", "DOGE/USDT", ),
+            ("dotusdt",  "DOT/USDT",  ),
+            ("linkusdt", "LINK/USDT", ),
+            ("ltcusdt",  "LTC/USDT",  ),
+            ("shibusdt", "SHIB/USDT", )
         ]
 
-        # Create everything automatically
         for symbol, display_name in crypto_list:
-        
-            # initial visibility
-            self.ticker_states[symbol] = False
-
-            # create ticker instance
-            self.tickers_dict[symbol] = CryptoTicker(
-                self.center_panel, symbol, display_name
-            )
-
-            # create button
             btn = ttk.Button(
-                control_frame,
-                text=f"Show {display_name}",
-                style="Toggle.TButton",
+                self.overlay_panel,
+                text=display_name,
+                style="Overlay.TButton",
                 command=lambda s=symbol: self.toggle_ticker(s)
             )
-            btn.pack(pady=5)
+            btn.pack(side="left", padx=6)
 
-            # store button reference
-            self.ticker_buttons[symbol] = btn
+            self.overlay_buttons[symbol] = btn
 
         # Add tickers
         self.add_ticker(self.left_panel, BTCTicker )
@@ -160,21 +209,31 @@ class MultiTickerApp:
         )
 
     def toggle_ticker(self, symbol):
-            # Stop and remove the old chart/feed
-            if hasattr(self, "active_chart"):
-                self.active_feed.stop() 
-                self.active_chart.pack_forget()
+        if hasattr(self, "active_chart"):
+            self.active_feed.stop()
+            self.active_chart.pack_forget()
 
-            # Create the new chart widget
-            self.active_chart = CandleChart(self.center_panel, title=symbol.upper())
-            self.active_chart.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
-            self.active_feed = BinanceKlineFeed(
-                chart=self.active_chart, 
-                root=self.root,  
-                symbol=symbol, 
-                interval="5m"
-            )
-            self.active_feed.start()
+        # reset all labels
+        for btn in self.overlay_buttons.values():
+            btn.configure(style="Overlay.TButton")
+
+        # highlight active
+        self.overlay_buttons[symbol].configure(
+            style="OverlayActive.TButton"
+        )
+
+        self.active_chart = CandleChart(self.center_panel, title=symbol.upper())
+        self.active_chart.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
+
+        self.active_feed = BinanceKlineFeed(
+            chart=self.active_chart,
+            root=self.root,
+            symbol=symbol,
+            interval="5m"
+        )
+        self.active_feed.start()
+        self.overlay_panel.lift()
+        self.overlay_container.lift()
 
 
     def add_ticker(self, parent, TickerClass):
@@ -188,12 +247,14 @@ class MultiTickerApp:
 
 
     def on_closing(self):
-        for t in self.tickers:
-            t.stop()
-        self.is_closing = True
-        if self.ws:
-            self.ws.close()
-        self.root.destroy()
+            if hasattr(self, "active_feed"):
+                try:
+                    self.active_feed.stop()
+                    print("Active feed stopped.")
+                except Exception as e:
+                    print(f"Error stopping active feed: {e}")
+    
+            self.root.after(100, self.root.destroy)
 
 
 if __name__ == "__main__":
