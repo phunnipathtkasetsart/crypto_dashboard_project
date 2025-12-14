@@ -46,6 +46,9 @@ The project is modularized for easy maintenance and scalability:
 * **`test_api.py`**: A standalone diagnostic utility to verify API and WebSocket health.
 
 ---
+## Known bugs
+- News API is not working
+- The left panel price tickers are not responsive
 
 ## 🔧 Installation & Setup
 
